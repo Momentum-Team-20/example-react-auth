@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-const QuestionForm = ({ token }) => {
+import { useNavigate, useOutletContext } from 'react-router-dom'
+const QuestionForm = () => {
   const [questionData, setQuestionData] = useState({})
   const [error, setError] = useState(null)
   const navigate = useNavigate()
+  const token = useOutletContext()
 
   const handleInputChange = (e) => {
     setQuestionData({

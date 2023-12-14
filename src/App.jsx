@@ -4,8 +4,10 @@ import axios from 'axios'
 import { useEffect } from 'react'
 import Login from './components/Login'
 import QuestionList from './components/QuestionList'
+import QuestionListMe from './components/QuestionListMe'
 import QuestionDetail from './components/QuestionDetail'
 import QuestionForm from './components/QuestionForm'
+import ProtectedRoute from './components/ProtectedRoute'
 import useLocalStorageState from 'use-local-storage-state'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
@@ -29,23 +31,21 @@ function App() {
         />
         <Route path="/questions" element={<QuestionList />} />
         <Route path="/questions/:id" element={<QuestionDetail />} />
-        <Route path="/questions/new" element={<QuestionForm token={token} />} />
-        <Route
-          path="questions/me"
-          element={
-            token ? (
-              <QuestionsMyList token={token} />
-            ) : (
-              <Login setAuth={setAuth} />
-            )
-          }
-        />
         <Route path="*" element={<h2>404</h2>} />
+        {/* Below is one (more complicated) way to protect more than one route at a time
+        This uses Outlet and useOutletContext from react router */}
+        <Route element={<ProtectedRoute token={token} />}>
+          <Route path="/questions/new" element={<QuestionForm />} />
+          <Route
+            path="questions/me"
+            element={<QuestionListMe username={username} />}
+          />
+        </Route>
       </Routes>
     </>
   )
 }
-
+  
 const QuestionsMyList = ({ username, token }) => {
   const [questions, setQuestions] = useState([])
 
