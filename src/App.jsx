@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useEffect } from 'react'
 import Login from './components/Login'
 import useLocalStorageState from 'use-local-storage-state'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router-dom'
 
 function App() {
   const [questions, setQuestions] = useState([])
@@ -31,19 +31,19 @@ function App() {
           path="/questions"
           element={<QuestionList questions={questions} />}
         />
-        {/* <Route path="questions/:id" element={}> */}
+        <Route path="questions/:id" element={<QuestionDetail />} />
         <Route
-          path="questions/mine"
-          element={token ? <QuestionUserList token={token} username={username} /> : <Login />}
+          path="questions/me"
+          element={token ? <QuestionsMyList token={token} /> : <Login />}
         />
-        <Route path="/login" element={<Login />}
+        <Route path="/login" element={<Login />} />
         <Route path="*" element={<h2>404</h2>} />
       </Routes>
     </>
   )
 }
 
-const QuestionUserList = ({ username, token }) => {
+const QuestionsMyList = ({ username, token }) => {
   const [questions, setQuestions] = useState([])
 
   useEffect(() => {
@@ -81,6 +81,35 @@ const QuestionList = ({ questions }) => {
 }
 
 const QuestionDetail = () => {
-  return <h1> Question Detail page</h1>
+  const [question, setQuestion] = useState(null)
+  const { id } = useParams()
+
+  useEffect(() => {
+    axios
+      .get(`https://qb.fly.dev/questions/${id}`)
+      .then((res) => setQuestion(res.data))
+  }, [id])
+  return (
+    <>
+      <h1> Question Detail page</h1>
+      {question && (
+        <>
+          <h2>{question.title}</h2>
+          <p>{question.body}</p>
+          {question.answers &&
+            question.answers.map((answer) => (
+              <div
+                className="answer"
+                style={{ border: '1px solid silver', padding: '1rem' }}
+                key={answer.id}
+              >
+                <p>{answer.text}</p>
+                <p style={{ fontWeight: 'bold' }}>{answer.author.username}</p>
+              </div>
+            ))}
+        </>
+      )}
+    </>
+  )
 }
 export default App
