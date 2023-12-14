@@ -3,11 +3,13 @@ import './App.css'
 import axios from 'axios'
 import { useEffect } from 'react'
 import Login from './components/Login'
+import QuestionList from './components/QuestionList'
+import QuestionDetail from './components/QuestionDetail'
+import QuestionForm from './components/QuestionForm'
 import useLocalStorageState from 'use-local-storage-state'
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 
 function App() {
-  const [questions, setQuestions] = useState([])
   const [token, setToken] = useLocalStorageState('qbToken', '')
   const [username, setUsername] = useLocalStorageState('qbUsername', '')
 
@@ -16,27 +18,28 @@ function App() {
     setToken(token)
   }
 
-  useEffect(() => {
-    axios.get('https://qb.fly.dev/questions').then((res) => {
-      setQuestions(res.data)
-    })
-  }, [])
-
   return (
     <>
       <h1>Questions</h1>
       <Routes>
         <Route path="/" element={<h2>Homepage</h2>} />
         <Route
-          path="/questions"
-          element={<QuestionList questions={questions} />}
+          path="/login"
+          element={token ? <Navigate to="/" /> : <Login setAuth={setAuth} />}
         />
-        <Route path="questions/:id" element={<QuestionDetail />} />
+        <Route path="/questions" element={<QuestionList />} />
+        <Route path="/questions/:id" element={<QuestionDetail />} />
+        <Route path="/questions/new" element={<QuestionForm token={token} />} />
         <Route
           path="questions/me"
-          element={token ? <QuestionsMyList token={token} /> : <Login />}
+          element={
+            token ? (
+              <QuestionsMyList token={token} />
+            ) : (
+              <Login setAuth={setAuth} />
+            )
+          }
         />
-        <Route path="/login" element={<Login />} />
         <Route path="*" element={<h2>404</h2>} />
       </Routes>
     </>
@@ -70,46 +73,7 @@ const QuestionsMyList = ({ username, token }) => {
   )
 }
 
-const QuestionList = ({ questions }) => {
-  return (
-    <ul>
-      {questions.map((question) => {
-        return <li key={question.id}>{question.title}</li>
-      })}
-    </ul>
-  )
-}
 
-const QuestionDetail = () => {
-  const [question, setQuestion] = useState(null)
-  const { id } = useParams()
 
-  useEffect(() => {
-    axios
-      .get(`https://qb.fly.dev/questions/${id}`)
-      .then((res) => setQuestion(res.data))
-  }, [id])
-  return (
-    <>
-      <h1> Question Detail page</h1>
-      {question && (
-        <>
-          <h2>{question.title}</h2>
-          <p>{question.body}</p>
-          {question.answers &&
-            question.answers.map((answer) => (
-              <div
-                className="answer"
-                style={{ border: '1px solid silver', padding: '1rem' }}
-                key={answer.id}
-              >
-                <p>{answer.text}</p>
-                <p style={{ fontWeight: 'bold' }}>{answer.author.username}</p>
-              </div>
-            ))}
-        </>
-      )}
-    </>
-  )
-}
+
 export default App

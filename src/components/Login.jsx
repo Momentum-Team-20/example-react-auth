@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 const Login = ({ setAuth }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -15,7 +17,10 @@ const Login = ({ setAuth }) => {
         username: username,
         password: password,
       })
-      .then((res) => setAuth(username, res.data.auth_token))
+      .then((res) => {
+        setAuth(username, res.data.auth_token)
+        navigate('/')
+      })
       .catch((err) => setError(err.response.data.non_field_errors[0]))
   }
 
