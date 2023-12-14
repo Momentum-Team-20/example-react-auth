@@ -3,11 +3,12 @@ import './App.css'
 import axios from 'axios'
 import { useEffect } from 'react'
 import Login from './components/Login'
+import useLocalStorageState from 'use-local-storage-state'
 
 function App() {
   const [questions, setQuestions] = useState([])
-  const [token, setToken] = useState(null)
-  const [username, setUsername] = useState('')
+  const [token, setToken] = useLocalStorageState('qbToken', '')
+  const [username, setUsername] = useLocalStorageState('qbUsername', '')
 
   const setAuth = (username, token) => {
     setUsername(username)
@@ -15,16 +16,10 @@ function App() {
   }
 
   useEffect(() => {
-    axios
-      .get('https://qb.fly.dev/questions/me', {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      })
-      .then((res) => {
-        setQuestions(res.data)
-      })
-  }, [token])
+    axios.get('https://qb.fly.dev/questions').then((res) => {
+      setQuestions(res.data)
+    })
+  }, [])
 
   return (
     <>
